@@ -5,6 +5,6 @@
     "RWKV_JIT_ON": "1",
     "RWKV_CUDA_ON": "1",
     "data_path": "UserData",
-    "chunk_size_limit": 1,
+    "chunk_size_limit": 3,
     "similarity_top_k": 1
 }
