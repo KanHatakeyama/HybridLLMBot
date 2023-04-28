@@ -1,5 +1,5 @@
-import nltk
-nltk.download('punkt')
+#import nltk
+#nltk.download('punkt')
 import glob
 import os
 import shutil
@@ -17,13 +17,9 @@ def auto_txt_split(glob_path, chunk_size_limit,init=False):
     for path in path_list:
         split_text_file(path, chunk_size_limit,init=init)
 
-def split_text_file(input_file, token_length,init=False):
+def split_text_file(input_file, chunk_size_limit=100,init=False):
     with open(input_file, 'r') as f:
         text = f.read()
-
-    tokens = nltk.word_tokenize(text)
-    num_tokens = len(tokens)
-    num_chunks = num_tokens // token_length + (1 if num_tokens % token_length != 0 else 0)
 
 
     def filename(input_file, i):
@@ -35,13 +31,56 @@ def split_text_file(input_file, token_length,init=False):
     if os.path.exists(output_file) and init==False:
         return
 
-    for i in range(num_chunks):
-        start = i * token_length
-        end = min((i + 1) * token_length, num_tokens)
-        chunk_tokens = tokens[start:end]
-        chunk_text = ' '.join(chunk_tokens)
-        output_file=filename(input_file, i)
-        with open(output_file, 'w') as f:
+    text_list=split_text(text,chunk_size_limit)
+    for i,chunk_text in enumerate(text_list):
+       output_file=filename(input_file, i)
+       with open(output_file, 'w') as f:
             f.write(chunk_text)
 
-        print(output_file)
+       print(output_file)
+
+
+
+def unify_text(text):
+    text=text.replace("。","\n")
+    text=text.replace(".","\n")
+    text=text.replace("．","\n")
+    text=text.replace("？","\n")
+    text=text.replace("?","\n")
+    text=text.replace("！","\n")
+    text=text.replace("!","\n")
+    text=text.replace("；","\n")
+    text=text.replace(";","\n")
+    text=text.replace("：","\n")
+    text=text.replace(":","\n")
+    text=text.replace("　"," ")
+
+    return text
+
+
+def split_text(text,chunk_size_limit=100):
+    text=unify_text(text)
+
+    text_list=text.split("\n")
+
+    chunk_text_list=[]
+    temp_text=""
+    for t in text_list:
+        t=t.strip()
+        temp_text+=t+"."
+        if len(temp_text)<chunk_size_limit:
+            continue
+        else:
+            chunk_text_list.append(temp_text)
+            temp_text=""
+
+    return chunk_text_list
+
+def pad_text(text,chunk_size_limit=100):
+    t=""
+    while True:
+        t+=text+"."
+        if len(t)>chunk_size_limit:
+            break
+    return t
+
