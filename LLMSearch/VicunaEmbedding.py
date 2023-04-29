@@ -15,10 +15,11 @@ def calc_vec(input_text, model, tokenizer):
 
     vec=np.array(vec_list)
     print(vec.shape)
-    v_comp1=np.mean(vec,axis=2)
-    v_comp2=np.mean(v_comp1,axis=2)
+    vec=np.mean(vec,axis=2)
+    vec=np.mean(vec,axis=0)
+    print(vec.shape)
 
-    return v_comp2
+    return vec
 
 class VicunaEmbedding:
     def __init__(self,model_name="AlekseyKorshuk/vicuna-7b",normalize=True) -> None:

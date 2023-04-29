@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 
 UserData/*
+settings/key.py
