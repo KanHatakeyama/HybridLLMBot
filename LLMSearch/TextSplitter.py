@@ -22,10 +22,7 @@ def split_text_file(input_file, chunk_size_limit=100,init=False):
         text = f.read()
 
 
-    def filename(input_file, i):
-        output_file = f"{input_file}_chunk_{i}.txt"
-        output_file= output_file.replace("/texts/", "/split/")
-        return output_file
+
 
     output_file =filename(input_file, 0)
     if os.path.exists(output_file) and init==False:
@@ -84,3 +81,7 @@ def pad_text(text,chunk_size_limit=100):
             break
     return t
 
+def filename(input_file, i):
+    output_file = f"{input_file}_chunk_{i}.txt"
+    output_file= output_file.replace("/texts/", "/split/")
+    return output_file

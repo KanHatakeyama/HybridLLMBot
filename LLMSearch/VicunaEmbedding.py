@@ -9,15 +9,16 @@ def calc_vec(input_text, model, tokenizer):
     with torch.no_grad():
         outputs = model(input_ids, output_hidden_states=True)
 
-    #list形式でtensorが入っているoutputsを1次元のnumpyに変換
     vec_list=[]
     for v in outputs[-1]:
-        mean_v=v.mean(axis=1)
-        vec_list.append(mean_v.numpy().flatten())
+        vec_list.append(v.numpy())
 
-    vec=np.array(vec_list).flatten()
+    vec=np.array(vec_list)
+    print(vec.shape)
+    v_comp1=np.mean(vec,axis=2)
+    v_comp2=np.mean(v_comp1,axis=2)
 
-    return vec
+    return v_comp2
 
 class VicunaEmbedding:
     def __init__(self,model_name="AlekseyKorshuk/vicuna-7b",normalize=True) -> None:
