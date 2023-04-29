@@ -18,14 +18,19 @@ class GPTQuery:
         )
         return (response.choices[0]["message"]["content"].strip())
 
-    def reference_ask(self,query,context):
-        res_dict={}
-        res_dict["answer"]=self.ask_gpt(query,context["text"])
-        res_dict["reference"]=context["path"]
-        res_dict["sim"]=context["sim"]
+    def reference_ask(self,query,context_list,k=2):
+        context_text=""
+        for i in range(k):
+            context_text+=context_list[i]["text"]+"."
 
-        with open(context["path"]) as f:
-            res_dict["context"]=f.read()
+
+        res_dict={}
+        res_dict["answer"]=self.ask_gpt(query,context_text)
+        #res_dict["reference"]=context["path"]
+        #res_dict["sim"]=context["sim"]
+        #res_dict["context"]=context["text"]
+        res_dict["context"]=context_list[:k]
+
 
         return res_dict
 
