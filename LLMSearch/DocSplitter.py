@@ -4,6 +4,7 @@ from llama_index import SimpleDirectoryReader
 import glob
 import re
 from .CleanText import clean_text
+import hashlib
 
 def filename_fn(filename): return {"file_name": filename}
 
@@ -65,7 +66,8 @@ def split_documents(json_path='settings/settings.json',initiate=False,verbose=Tr
         chunk_list=split_text(text,chunk_size_limit)
 
         for i,chunk in enumerate(chunk_list):
-            output_file=split_folder_path+"/"+file_name+"_"+str(i)+".txt"
+            base_name=split_folder_path+"/"+file_name+"_"+str(i)
+            output_file=base_name+"_"+generate_unique_code(base_name+file_path)+".txt"
             with open(output_file, 'w') as f:
                 f.write(chunk)
         
@@ -106,6 +108,7 @@ def split_text(text,chunk_size_limit=100):
             chunk_text_list.append(temp_text)
             temp_text=""
 
+    chunk_text_list.append(temp_text)
     return chunk_text_list
 
 def pad_text(text,chunk_size_limit=100):
@@ -115,3 +118,17 @@ def pad_text(text,chunk_size_limit=100):
         if len(t)>chunk_size_limit:
             break
     return t
+
+
+
+def generate_unique_code(text,length=10):
+    # 文字列をバイト列に変換
+    text_bytes = text.encode('utf-8')
+    
+    # SHA-256ハッシュを計算
+    hash_object = hashlib.sha256(text_bytes)
+    
+    # ハッシュを16進数の文字列に変換
+    unique_code = hash_object.hexdigest()
+    
+    return unique_code[:length]
