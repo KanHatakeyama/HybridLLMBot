@@ -3,6 +3,7 @@ import os
 from llama_index import SimpleDirectoryReader
 import glob
 import re
+from .CleanText import clean_text
 
 def filename_fn(filename): return {"file_name": filename}
 
@@ -57,6 +58,7 @@ def split_documents(json_path='settings/settings.json',initiate=False,verbose=Tr
 
     for doc in documents:
         text=doc.text
+        text=clean_text(text)
         file_path=doc.extra_info["file_name"]
         file_name=os.path.basename(file_path)
 

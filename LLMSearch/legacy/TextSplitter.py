@@ -3,6 +3,7 @@
 import glob
 import os
 import shutil
+from ..CleanText import clean_text
 
 def auto_txt_split(glob_path, chunk_size_limit,init=False):
     path_list=glob.glob(glob_path)
@@ -21,8 +22,7 @@ def split_text_file(input_file, chunk_size_limit=100,init=False):
     with open(input_file, 'r') as f:
         text = f.read()
 
-
-
+    text=clean_text(text)
 
     output_file =filename(input_file, 0)
     if os.path.exists(output_file) and init==False:
