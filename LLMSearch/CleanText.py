@@ -7,6 +7,14 @@ import re
 import unicodedata
 
 
+def pad_text(text,chunk_size_limit=100):
+    t=""
+    while True:
+        t+=text+"."
+        if len(t)>chunk_size_limit:
+            break
+    return t
+
 def len_(text):
     cnt = 0
     for t in text:
