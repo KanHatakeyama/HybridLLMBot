@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 import json
 import numpy as np
-from LLMSearch.RWKVEmbedding import RWKVEmbedding
+from LLMSearch.legacy.RWKVEmbedding import RWKVEmbedding
 from LLMSearch.VicunaEmbedding import VicunaEmbedding
 
 with open('settings/settings.json') as f:

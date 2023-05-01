@@ -35,11 +35,16 @@ def split_documents(json_path='settings/settings.json',initiate=False,verbose=Tr
         #delete all files in split folder
         split_file_list=glob.glob(split_folder_path+"/*")
         for file in split_file_list:
+            print("initiating split folder...")
             os.remove(file)
+            print("done")
 
 
     #check for finished documents
     split_file_list=glob.glob(split_folder_path+"/*")
+    fin_file_list=[i[:-15]+".txt" for i in split_file_list]
+    #print(fin_file_list)
+    #return
     fin_file_list=[re.sub(r"_[0-9]+.txt","",file) for file in split_file_list]
     fin_file_list=list(set(fin_file_list))
     fin_file_list=[os.path.basename(file) for file in fin_file_list]

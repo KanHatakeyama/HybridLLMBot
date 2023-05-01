@@ -26,9 +26,14 @@ class AnswerBot:
 
         if not initiate:
             self.load_model()
-
+        count=0
         for path in tqdm(chunk_path_list):
             self.searcher.calc_text_file(path)
+            count+=1
+
+            #30回に1回保存
+            if count%10==0:
+                self.searcher.save_model()
 
         self.searcher.save_model()
 
