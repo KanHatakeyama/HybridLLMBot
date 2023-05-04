@@ -1,9 +1,13 @@
 import requests
 import numpy as np
+import json
 
 class ServerEmbedding:
-    def __init__(self,url="http://localhost:5000/api") -> None:
-        self.url=url
+    def __init__(self,setting_path='settings/settings.json',) -> None:
+    
+        with open(setting_path) as f:
+            settings = json.load(f)
+        self.url=settings["EMBED_SERVER_URL"]
         
 
     def __call__(self,query):

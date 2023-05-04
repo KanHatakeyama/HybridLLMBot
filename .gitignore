@@ -161,3 +161,5 @@ cython_debug/
 
 UserData/*
 settings/key.py
+develop
+settings/20B_tokenizer.json

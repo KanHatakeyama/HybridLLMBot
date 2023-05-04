@@ -72,7 +72,8 @@ with st.form("Ask Question"):
             if reference_checkbox_state:
                 #search for reference data and ask GPT
                 st.markdown('Searching for references...')
-                answer=bot.ask(user_message)
+                k=settings["similarity_top_k"]
+                answer=bot.ask(user_message,k=k)
             else:
                 #just ask GPT
                 answer=bot.query_module.ask_gpt(user_message)

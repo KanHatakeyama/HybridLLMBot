@@ -7,7 +7,6 @@ class GPTQuery:
         self.model=model
 
 
-
     def ask_gpt(self,query,context_text=None):
         if context_text is not None:
             messages=[
@@ -33,9 +32,6 @@ class GPTQuery:
 
         res_dict={}
         res_dict["answer"]=self.ask_gpt(query,context_text)
-        #res_dict["reference"]=context["path"]
-        #res_dict["sim"]=context["sim"]
-        #res_dict["context"]=context["text"]
         res_dict["context"]=context_list[:k]
 
 
