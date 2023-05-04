@@ -52,6 +52,7 @@ def split_documents(json_path='settings/settings.json',initiate=False,verbose=Tr
 
     fin_ids=[]
     for i,file in enumerate(available_file_list):
+        #TODO: skipping does not seem to work
         if file in fin_file_list:
             fin_ids.append(i)
             print_v("skip: "+file,verbose)

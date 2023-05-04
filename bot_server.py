@@ -2,9 +2,13 @@ import streamlit as st
 from streamlit_chat import message
 import os
 import json
+import csv
+import datetime
+import pandas as pd
 
-def parse_response(res):
+def test_response(res):
     return "good!",["google.com","yahoo.com"]
+
 setting_path='settings/settings.json'
 
 with open(setting_path) as f:
@@ -22,6 +26,11 @@ log_path=settings["data_path"]+"/chatlog.txt"
 
 st.title("Ask me anything!")
 
+#
+gpt4_checkbox_state = st.checkbox('Use GPT4')
+reference_checkbox_state = st.checkbox('Search for Lab. data')
+show_log_checkbox_state = st.checkbox('Show chat log')
+
 if "generated" not in st.session_state:
     st.session_state.generated = []
 if "past" not in st.session_state:
@@ -32,21 +41,56 @@ with st.form("Ask Question"):
 
     submitted = st.form_submit_button("Submit")
     if submitted:
-        #res = searcher.query(user_message)
-        answer=bot.ask(user_message)
 
-        with open(log_path, "a") as f:
-            f.write(f"{user_message}\n{answer}\n\n\n")
 
-        st.session_state.past.append(user_message)
-        st.session_state.generated.append(answer)
+        #show log
+        if show_log_checkbox_state:
+            st.markdown('Chat log:')
+            df=pd.read_csv(log_path,header=None)
+            df.columns=["time","user","bot"]
+            df.sort_values(by="time",ascending=False,inplace=True)
 
-        if st.session_state["generated"]:
-            for i in range(len(st.session_state.generated) - 1, -1, -1):
-                message(st.session_state.generated[i], key=str(i))
-                message(st.session_state.past[i],
-                        is_user=True, key=str(i) + "_user")
+            for i in range(len(df)):
+                st.markdown(df.iloc[i]["time"])
+                st.markdown(df.iloc[i]["user"])
+                st.markdown(df.iloc[i]["bot"])
+                st.markdown("---")
 
-                #for url in url_list:
-                #    http_url = "http://"+url
-                #    st.markdown(f"[{http_url}]({http_url})")
+            #with open(log_path) as f:
+            #    for line in f:
+            #        st.markdown(line)
+
+        else:
+            #change GPT model
+            if gpt4_checkbox_state:
+                bot.query_module.model="gpt-4"
+                st.markdown('GPT-4 enabled. This may take a longer time. (ca. 1 min)')
+            else:
+                bot.query_module.model="gpt-3.5-turbo"
+                st.markdown('GPT-3.5 enabled. Please wait for ca. 10 sec.')
+
+            if reference_checkbox_state:
+                #search for reference data and ask GPT
+                st.markdown('Searching for references...')
+                answer=bot.ask(user_message)
+            else:
+                #just ask GPT
+                answer=bot.query_module.ask_gpt(user_message)
+
+            #log
+            with open(log_path, 'a') as f:
+                writer = csv.writer(f)
+                time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+                writer.writerow([time, user_message, answer])
+                
+
+
+            st.session_state.past.append(user_message)
+            st.session_state.generated.append(answer)
+
+            if st.session_state["generated"]:
+                for i in range(len(st.session_state.generated) - 1, -1, -1):
+                    message(st.session_state.generated[i], key=str(i))
+                    message(st.session_state.past[i],
+                            is_user=True, key=str(i) + "_user")
+

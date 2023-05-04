@@ -8,13 +8,20 @@ class GPTQuery:
 
 
 
-    def ask_gpt(self,query,context_text):
-        response = openai.ChatCompletion.create(
-            model=self.model,
+    def ask_gpt(self,query,context_text=None):
+        if context_text is not None:
             messages=[
                 {"role": "assistant", "content": context_text},
                 {"role": "user", "content": query},
-            ],
+            ]
+        else:
+            messages=[
+                {"role": "user", "content": query},
+            ]
+
+        response = openai.ChatCompletion.create(
+            model=self.model,
+            messages=messages,
         )
         return (response.choices[0]["message"]["content"].strip())
 
