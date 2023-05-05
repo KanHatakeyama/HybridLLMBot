@@ -164,3 +164,4 @@ settings/key.py
 develop
 settings/20B_tokenizer.json
 nohup.out
+.vscode
