@@ -38,7 +38,7 @@ python embed_server.py
 ```
 - フロントエンドサーバー
 ```
-streamlit run bot_server.py
+streamlit run bot_server.py --server.address 0.0.0.0
 ``` 
 - index 更新
   - ipynbを参照
