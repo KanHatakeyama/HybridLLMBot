@@ -44,7 +44,7 @@ class TextSearcher:
         ret_list = []
         for i in range(k):
             path = self.path_list[I[0][i]]
-            with open(path, 'r') as f:
+            with open(path, 'r', encoding="utf-8") as f:
                 text = f.read()
 
             temp_dict = {}
