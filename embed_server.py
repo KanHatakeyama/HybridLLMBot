@@ -1,8 +1,8 @@
 from flask import Flask, jsonify, request
 import json
 import numpy as np
-#from LLMSearch.legacy.RWKVEmbedding import RWKVEmbedding
-from LLMSearch.GPTEmbedding import GPTEmbedding
+#from LLMSearch.Embedding.RWKVEmbedding import RWKVEmbedding
+from LLMSearch.Embedding.GPTEmbedding import GPTEmbedding
 
 with open('settings/settings.json') as f:
     settings = json.load(f)
@@ -13,11 +13,15 @@ if settings['EMBED_MODE'] == 'GPT':
     from settings.key import GPT_API_KEY
     embedder = GPTEmbedding(GPT_API_KEY)
 elif settings['EMBED_MODE'] == 'Vicuna':
-    from LLMSearch.VicunaEmbedding import VicunaEmbedding
+    from LLMSearch.Embedding.VicunaEmbedding import VicunaEmbedding
     embedder = VicunaEmbedding()
+elif settings['EMBED_MODE'] == 'SBERT':
+    from LLMSearch.Embedding.SBERTEmbedding import SBERTEmbedding
+    embedder = SBERTEmbedding()
 else:
     raise ValueError('EMBED_MODE not recognized:', settings['EMBED_MODE'])
 # embedder=RWKVEmbedding(settings)
+print('Embedding mode:', settings['EMBED_MODE'])
 
 
 @app.route('/api', methods=['POST'])

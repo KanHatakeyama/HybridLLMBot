@@ -5,6 +5,7 @@ import glob
 import re
 from .CleanText import clean_text
 import hashlib
+from tqdm import tqdm
 
 
 def filename_fn(filename): return {"file_name": filename}
@@ -38,10 +39,9 @@ def split_documents(json_path='settings/settings.json', initiate=False, verbose=
     if initiate:
         # delete all files in split folder
         split_file_list = glob.glob(split_folder_path+"/*")
-        for file in split_file_list:
-            print("initiating split folder...")
+        print("removing files...")
+        for file in tqdm(split_file_list):
             os.remove(file)
-            print("done")
 
     # check for finished documents
     split_file_list = glob.glob(split_folder_path+"/*")
@@ -66,7 +66,8 @@ def split_documents(json_path='settings/settings.json', initiate=False, verbose=
 
     documents = directory_reader.load_data()
 
-    for doc in documents:
+    print_v("splitting...", verbose)
+    for doc in tqdm(documents):
         text = doc.text
         text = clean_text(text)
         file_path = doc.extra_info["file_name"]
@@ -81,7 +82,7 @@ def split_documents(json_path='settings/settings.json', initiate=False, verbose=
             with open(output_file, 'w') as f:
                 f.write(chunk)
 
-        print_v("split: "+file_name, verbose)
+        #print_v("split: "+file_name, verbose)
 
 
 def unify_text(text):

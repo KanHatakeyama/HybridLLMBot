@@ -1,4 +1,4 @@
-from settings.key import GPT_API_KEY
+from settings.key import GPT_API_KEY, DEEPL_API_KEY
 from LLMSearch.GPTQuery import GPTQuery
 from LLMSearch.AnswerBot import AnswerBot
 import streamlit as st
@@ -21,7 +21,8 @@ with open(setting_path) as f:
 
 
 # initiate bot module
-bot = AnswerBot(query_module=GPTQuery(GPT_API_KEY))
+bot = AnswerBot(query_module=GPTQuery(GPT_API_KEY),
+                DEEPL_API_KEY=DEEPL_API_KEY)
 bot.load_model()
 
 log_path = settings["data_path"]+"/chatlog.txt"
@@ -30,7 +31,8 @@ st.title("Ask me anything!")
 
 #
 gpt4_checkbox_state = st.checkbox('Use GPT4')
-reference_checkbox_state = st.checkbox('Search for Lab. data')
+reference_checkbox_state = st.checkbox('Load local data')
+translate_checkbox_state = st.checkbox('Translate Japanese to English')
 show_log_checkbox_state = st.checkbox('Show chat log')
 
 if "generated" not in st.session_state:
@@ -57,10 +59,6 @@ with st.form("Ask Question"):
                 st.markdown(df.iloc[i]["bot"])
                 st.markdown("---")
 
-            # with open(log_path) as f:
-            #    for line in f:
-            #        st.markdown(line)
-
         else:
             # change GPT model
             if gpt4_checkbox_state:
@@ -75,7 +73,10 @@ with st.form("Ask Question"):
                 # search for reference data and ask GPT
                 st.markdown('Searching for references...')
                 k = settings["similarity_top_k"]
-                answer = bot.ask(user_message, k=k)
+                if translate_checkbox_state:
+                    answer = bot.ask(user_message, k=k, Ja_to_En=True)
+                else:
+                    answer = bot.ask(user_message, k=k)
             else:
                 # just ask GPT
                 answer = bot.query_module.ask_gpt(user_message)

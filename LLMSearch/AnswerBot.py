@@ -36,6 +36,7 @@ class AnswerBot:
         if not initiate:
             self.load_model()
         count = 0
+        print("calculating vectors...")
         for path in tqdm(chunk_path_list):
             self.searcher.calc_text_file(path)
             count += 1
