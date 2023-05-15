@@ -22,6 +22,7 @@ def split_documents(json_path='settings/settings.json', initiate=False, verbose=
 
     original_folder_path = settings["data_path"]+"/original"
     split_folder_path = settings["data_path"]+"/split"
+    fin_text_path = settings["data_path"]+"/meta/text_finished.txt"
     chunk_size_limit = settings["chunk_size_limit"]
 
     if not os.path.exists(split_folder_path):
@@ -33,38 +34,34 @@ def split_documents(json_path='settings/settings.json', initiate=False, verbose=
         recursive=True,
     )
 
-    available_file_list = [str(input_file)
-                           for input_file in directory_reader.input_files]
-
     if initiate:
         # delete all files in split folder
         split_file_list = glob.glob(split_folder_path+"/*")
-        print("removing files...")
+        print_v("removing files...", verbose)
         for file in tqdm(split_file_list):
             os.remove(file)
 
-    # check for finished documents
-    split_file_list = glob.glob(split_folder_path+"/*")
-    fin_file_list = [i[:-15]+".txt" for i in split_file_list]
-    # print(fin_file_list)
-    # return
-    fin_file_list = [re.sub(r"_[0-9]+.txt", "", file)
-                     for file in split_file_list]
-    fin_file_list = list(set(fin_file_list))
-    fin_file_list = [os.path.basename(file) for file in fin_file_list]
-    fin_file_list = [original_folder_path+"/"+file for file in fin_file_list]
+    # load unfinished files
+    with open(fin_text_path, 'r') as f:
+        fin_file_list = f.read().splitlines()
 
+    print_v("checking for finished files...", verbose)
     fin_ids = []
-    for i, file in enumerate(available_file_list):
-        # TODO: skipping does not seem to work
-        if file in fin_file_list:
+    for i, file in enumerate(directory_reader.input_files):
+        # print(file)
+        if str(file) in fin_file_list:
             fin_ids.append(i)
-            print_v("skip: "+file, verbose)
 
     for i in sorted(fin_ids, reverse=True):
         directory_reader.input_files.pop(i)
 
     documents = directory_reader.load_data()
+
+    # log finished files
+    mode = "a" if not initiate else "w"
+    with open(fin_text_path, mode) as f:
+        for path in directory_reader.input_files:
+            f.write(str(path)+"\n")
 
     print_v("splitting...", verbose)
     for doc in tqdm(documents):
@@ -74,8 +71,9 @@ def split_documents(json_path='settings/settings.json', initiate=False, verbose=
         file_name = os.path.basename(file_path)
 
         chunk_list = split_text(text, chunk_size_limit)
-
+        # print(file_path)
         for i, chunk in enumerate(chunk_list):
+            #print(i, chunk)
             base_name = split_folder_path+"/"+file_name+"_"+str(i)
             output_file = base_name+"_" + \
                 generate_unique_code(base_name+file_path)+".txt"
