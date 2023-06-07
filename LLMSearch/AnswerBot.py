@@ -2,6 +2,7 @@ import json
 from .DocSplitter import split_documents
 from LLMSearch.TextSearcher import TextSearcher
 from LLMSearch.ServerEmbedding import ServerEmbedding
+from .SQLTextDB import SQLTextDB
 from tqdm import tqdm
 import glob
 from .CleanText import pad_text
@@ -15,8 +16,10 @@ class AnswerBot:
             settings = json.load(f)
 
         self.settings = settings
-        self.embedder = ServerEmbedding()
-        self.searcher = TextSearcher(self.embedder, self.settings["data_path"])
+        #self.embedder = ServerEmbedding()
+        #self.searcher = TextSearcher(self.embedder, self.settings["data_path"])
+        self.searcher = SQLTextDB(setting_path=setting_path)
+        self.setting_path = setting_path
         self.query_module = query_module
         self.DeepL_API_KEY = DEEPL_API_KEY
 
@@ -24,15 +27,15 @@ class AnswerBot:
             from .DeepLTranslate import DeepLTranslate
             self.translator = DeepLTranslate(self.DeepL_API_KEY)
 
-    def load_model(self):
-        self.searcher.load_model()
+    # def load_model(self):
+    #    self.searcher.load_model()
 
     def index_documents(self, initiate=False):
-        split_documents(initiate=initiate)
+        # split_documents(initiate=initiate)
         # calc vectors
-        chunk_path_list = glob.glob(
-            self.settings["data_path"] + "/split/*.txt")
-
+        # chunk_path_list = glob.glob(
+        #    self.settings["data_path"] + "/split/*.txt")
+        """
         if not initiate:
             self.load_model()
         count = 0
@@ -46,12 +49,23 @@ class AnswerBot:
                 self.searcher.save_model()
 
         self.searcher.save_model()
+        """
+        if initiate:
+            self.searcher = SQLTextDB(
+                setting_path=self.setting_path, initiate=True)
+
+        path_list = glob.glob(
+            self.settings["data_path"]+"/original/**/*.txt", recursive=True)
+
+        for path in tqdm(path_list):
+            self.searcher.add_text(path)
 
     def search_related_documents(self, question, k=3, pad=False):
-        if pad:
-            question = pad_text(question)
-        context_list = self.searcher.search(
-            (question, self.settings["chunk_size_limit"]), k)
+        # if pad:
+        #    question = pad_text(question)
+        context_list = self.searcher.search(question, k=k)
+        # context_list = self.searcher.search(
+        #    (question, self.settings["chunk_size_limit"]), k)
         return context_list
 
     def ask(self, question, k=3,
@@ -68,6 +82,7 @@ class AnswerBot:
             # print(question)
 
         context_list = self.search_related_documents(question, k, pad)
+        k = min(k, len(context_list))
         ans = self.query_module.reference_ask(question, context_list, k)
 
         if Ja_to_En:

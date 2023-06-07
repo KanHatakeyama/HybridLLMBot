@@ -23,7 +23,7 @@ with open(setting_path) as f:
 # initiate bot module
 bot = AnswerBot(query_module=GPTQuery(GPT_API_KEY),
                 DEEPL_API_KEY=DEEPL_API_KEY)
-bot.load_model()
+# bot.load_model()
 
 log_path = settings["data_path"]+"/chatlog.txt"
 

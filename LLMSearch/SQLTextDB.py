@@ -58,8 +58,8 @@ class SQLTextDB:
 
     def tokenize_query(self, query):
         # prepare tokenized list in japanese and english
-        #wakati_ids = self.tokenizer.encode(query, return_tensors='pt')
-        #tokenized_list = self.tokenizer.convert_ids_to_tokens(wakati_ids[0].tolist())
+        # wakati_ids = self.tokenizer.encode(query, return_tensors='pt')
+        # tokenized_list = self.tokenizer.convert_ids_to_tokens(wakati_ids[0].tolist())
 
         tokenized_list = self.tokenizer.parse(query).split(" ")
 
@@ -69,10 +69,11 @@ class SQLTextDB:
         tokenized_list = [i for i in tokenized_list if i not in [
             "[UNK]", "[SEP]", "[CLS]", "[PAD]"]]
         tokenized_list = [i for i in tokenized_list if i.find("##") == -1]
+        tokenized_list = [i for i in tokenized_list if len(i) > 1]
         tokenized_list = list(set(tokenized_list))
         return tokenized_list
 
-    def search_text(self, query, k=1000):
+    def search(self, query, k=10):
         tokenized_list = self.tokenize_query(query)
 
        # search words
@@ -86,4 +87,16 @@ class SQLTextDB:
 
         c = Counter(path_list)
         common_list = c.most_common(k)
-        return common_list
+
+        ret_list = []
+        k = min(k, len(common_list))
+        for i in range(k):
+            hit = common_list[i]
+
+            temp_dict = {}
+            temp_dict["path"] = hit[0][0]
+            temp_dict["text"] = hit[0][2]
+            temp_dict["sim"] = hit[1]
+            ret_list.append(temp_dict)
+
+        return ret_list
