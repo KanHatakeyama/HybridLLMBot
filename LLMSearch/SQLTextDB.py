@@ -4,9 +4,10 @@ import glob
 from tqdm import tqdm
 import json
 from transformers import BertJapaneseTokenizer
-# path_listでcountを取る
 from collections import Counter
 import nltk
+
+import MeCab
 nltk.download('punkt')
 
 
@@ -21,9 +22,9 @@ class SQLTextDB:
         self.db_path = settings["data_path"]+"/meta/text.db"
         self.chunk_size_limit = settings["chunk_size_limit"]
 
-        self.tokenizer = BertJapaneseTokenizer.from_pretrained(
-            settings["JAPANESE_TOKENIZER_MODEL"])
-
+        # self.tokenizer = BertJapaneseTokenizer.from_pretrained(
+        #    settings["JAPANESE_TOKENIZER_MODEL"])
+        self.tokenizer = MeCab.Tagger("-Owakati")
         self.db = Database(self.db_path, recreate=initiate)
         if initiate:
             self.add_record("path", "text", 0)
@@ -57,10 +58,11 @@ class SQLTextDB:
 
     def tokenize_query(self, query):
         # prepare tokenized list in japanese and english
-        wakati_ids = self.tokenizer.encode(query, return_tensors='pt')
-        tokenized_list = self.tokenizer.convert_ids_to_tokens(
-            wakati_ids[0].tolist())
-        #tokenized_list = tokenized_list[1:-1]
+        #wakati_ids = self.tokenizer.encode(query, return_tensors='pt')
+        #tokenized_list = self.tokenizer.convert_ids_to_tokens(wakati_ids[0].tolist())
+
+        tokenized_list = self.tokenizer.parse(query).split(" ")
+
         eng_tokenized_list = nltk.word_tokenize(query)
 
         tokenized_list.extend(eng_tokenized_list)

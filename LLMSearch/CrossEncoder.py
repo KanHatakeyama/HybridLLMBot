@@ -16,7 +16,7 @@ class CrossEncoder:
 
         with open(setting_path) as f:
             settings = json.load(f)
-        model_name = settings["CROSS_ENCODER_MODEL"]
+        #model_name = settings["CROSS_ENCODER_MODEL"]
         #self.model = CrossEncoder(model_name, device=device)
 
         #self.model = model
