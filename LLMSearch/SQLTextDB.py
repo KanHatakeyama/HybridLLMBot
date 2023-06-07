@@ -55,8 +55,7 @@ class SQLTextDB:
         for i, chunk in enumerate(chunk_list):
             self.add_record(path, chunk, i)
 
-    def search_text(self, query, k=1000):
-
+    def tokenize_query(self, query):
         # prepare tokenized list in japanese and english
         wakati_ids = self.tokenizer.encode(query, return_tensors='pt')
         tokenized_list = self.tokenizer.convert_ids_to_tokens(
@@ -69,6 +68,10 @@ class SQLTextDB:
             "[UNK]", "[SEP]", "[CLS]", "[PAD]"]]
         tokenized_list = [i for i in tokenized_list if i.find("##") == -1]
         tokenized_list = list(set(tokenized_list))
+        return tokenized_list
+
+    def search_text(self, query, k=1000):
+        tokenized_list = self.tokenize_query(query)
 
        # search words
         path_list = []
