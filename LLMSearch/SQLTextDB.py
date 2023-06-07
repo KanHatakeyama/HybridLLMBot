@@ -55,24 +55,29 @@ class SQLTextDB:
         for i, chunk in enumerate(chunk_list):
             self.add_record(path, chunk, i)
 
-    def search_text(self, query, k=10):
+    def search_text(self, query, k=1000):
 
-        # tokenize japanese
+        # prepare tokenized list in japanese and english
         wakati_ids = self.tokenizer.encode(query, return_tensors='pt')
-        jap_tokenized_list = self.tokenizer.convert_ids_to_tokens(
+        tokenized_list = self.tokenizer.convert_ids_to_tokens(
             wakati_ids[0].tolist())
-        jap_tokenized_list = jap_tokenized_list[1:-1]
-
+        #tokenized_list = tokenized_list[1:-1]
         eng_tokenized_list = nltk.word_tokenize(query)
-        # search words
-        path_list = []
-        for tokenized_list in [jap_tokenized_list, eng_tokenized_list]:
-            for key in tokenized_list:
-                rows = self.db.execute(
-                    "SELECT * FROM text WHERE text LIKE ?", (f'%{key}%',))
 
-                temp_path_list = [row[:] for row in rows]
-                path_list.extend(temp_path_list)
+        tokenized_list.extend(eng_tokenized_list)
+        tokenized_list = [i for i in tokenized_list if i not in [
+            "[UNK]", "[SEP]", "[CLS]", "[PAD]"]]
+        tokenized_list = [i for i in tokenized_list if i.find("##") == -1]
+        tokenized_list = list(set(tokenized_list))
+
+       # search words
+        path_list = []
+        for key in tokenized_list:
+            rows = self.db.execute(
+                "SELECT * FROM text WHERE text LIKE ?", (f'%{key}%',))
+
+            temp_path_list = [row[:] for row in rows]
+            path_list.extend(temp_path_list)
 
         c = Counter(path_list)
         common_list = c.most_common(k)

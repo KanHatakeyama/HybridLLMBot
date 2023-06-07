@@ -27,5 +27,6 @@ class CrossEncoder:
         scores = model.predict(pairs)
 
         # 類似度順にソートして返す
+        return sorted(zip(scores, pairs), reverse=True)
         scores, pairs = zip(*sorted(zip(scores, pairs), reverse=True))
         return scores, pairs
