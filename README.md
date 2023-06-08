@@ -53,6 +53,12 @@ streamlit run bot_server.py --server.address 0.0.0.0
 - index 更新
   - ipynbを参照
 
+- ファイルサーバー
+```
+python file_server.py
+
+```
+
 ## 主なTODO
 - 言語を跨いだ検索 (e.g., 日本語で検索→英語の文章を発掘)
     - DeepLで翻訳予定

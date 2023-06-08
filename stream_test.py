@@ -23,7 +23,7 @@ if len(input_text) > 0:
     ans = {}
     ans["answer"] = ""
     ans["context"] = related_documents
-    str_ans = parse_answer(ans)
+    str_ans = parse_answer(ans, base_url=bot.file_url)
     text += str_ans
 
     text += "## GPTの回答は以下の通りです\n"

@@ -10,7 +10,7 @@ class GPTQuery:
         if context_text is not None:
             messages = [
                 {"role": "assistant", "content": context_text},
-                {"role": "user", "content": query},
+                {"role": "user", "content": "Answer question from given context. Never use fictitious information: "+query},
             ]
         else:
             messages = [

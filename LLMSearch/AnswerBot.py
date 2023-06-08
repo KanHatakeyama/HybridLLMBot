@@ -22,6 +22,7 @@ class AnswerBot:
         self.setting_path = setting_path
         self.query_module = query_module
         self.DeepL_API_KEY = DEEPL_API_KEY
+        self.file_url = settings["FILE_URL"]
 
         if DEEPL_API_KEY is not None:
             from .DeepLTranslate import DeepLTranslate
@@ -104,11 +105,12 @@ class AnswerBot:
         return ans
 
 
-def parse_answer(ans, text_length=100):
+def parse_answer(ans, text_length=100, base_url="http://localhost:8099/"):
     txt = ans["answer"]+"\n\n"
     for i, doc in enumerate(ans["context"]):
         txt += f"- Reference {i+1} \n"
         p = doc["path"]
+        p = base_url+p
         txt += f"{p} \n"
         s = doc["sim"]
         txt += f"Similarity {s}\n"
