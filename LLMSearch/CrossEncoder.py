@@ -22,11 +22,10 @@ class CrossEncoder:
         #self.model = model
 
     def predict(self, question, references):
-        pairs = [(question, reference[0][2]) for reference in references]
+        pairs = [(question, reference["text"]) for reference in references]
 
         scores = model.predict(pairs)
+        for reference, score in zip(references, scores):
+            reference["sim"] = score
 
-        # 類似度順にソートして返す
-        return sorted(zip(scores, pairs), reverse=True)
-        scores, pairs = zip(*sorted(zip(scores, pairs), reverse=True))
-        return scores, pairs
+        return sorted(references, key=lambda x: x['sim'], reverse=True)
