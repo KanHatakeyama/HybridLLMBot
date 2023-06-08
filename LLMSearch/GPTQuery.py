@@ -6,7 +6,7 @@ class GPTQuery:
         openai.api_key = API_KEY
         self.model = model
 
-    def ask_gpt(self, query, context_text=None):
+    def ask_gpt(self, query, context_text=None, stream=False):
         if context_text is not None:
             messages = [
                 {"role": "assistant", "content": context_text},
@@ -20,10 +20,14 @@ class GPTQuery:
         response = openai.ChatCompletion.create(
             model=self.model,
             messages=messages,
+            stream=stream,
         )
-        return (response.choices[0]["message"]["content"].strip())
+        if not stream:
+            return (response.choices[0]["message"]["content"].strip())
+        else:
+            return response
 
-    def reference_ask(self, query, context_list, k=2, ref_max_length=3500):
+    def reference_ask(self, query, context_list, k=2, ref_max_length=3500, stream=False):
         context_text = ""
         for i in range(k):
             context_text += context_list[i]["text"]+"."
@@ -31,7 +35,7 @@ class GPTQuery:
         context_text = context_text[:ref_max_length]
 
         res_dict = {}
-        res_dict["answer"] = self.ask_gpt(query, context_text)
+        res_dict["answer"] = self.ask_gpt(query, context_text, stream=stream)
         res_dict["context"] = context_list[:k]
 
         return res_dict

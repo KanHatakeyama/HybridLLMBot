@@ -1,11 +1,11 @@
 import json
-from .DocSplitter import split_documents
-from LLMSearch.TextSearcher import TextSearcher
-from LLMSearch.ServerEmbedding import ServerEmbedding
+#from .DocSplitter import split_documents
+#from .TextSearcher import TextSearcher
+#from .ServerEmbedding import ServerEmbedding
 from .SQLTextDB import SQLTextDB
 from tqdm import tqdm
 import glob
-from .CleanText import pad_text
+#from .CleanText import pad_text
 
 
 class AnswerBot:
@@ -68,10 +68,13 @@ class AnswerBot:
         #    (question, self.settings["chunk_size_limit"]), k)
         return context_list
 
-    def ask(self, question, k=3,
+    def ask(self, question,
+            k=3,
+            context_list=None,
             pad=False,
             text_mode=True,
-            Ja_to_En=False):
+            Ja_to_En=False,
+            stream=False):
 
         if Ja_to_En:
             if self.DeepL_API_KEY is None:
@@ -81,31 +84,36 @@ class AnswerBot:
             #print("Japanese to English translation is done.")
             # print(question)
 
-        context_list = self.search_related_documents(question, k, pad)
+        if context_list is None:
+            context_list = self.search_related_documents(question, k, pad)
+
         k = min(k, len(context_list))
-        ans = self.query_module.reference_ask(question, context_list, k)
+        ans = self.query_module.reference_ask(
+            question, context_list, k, stream=stream)
 
         if Ja_to_En:
             eng_ans = "Answer: "+ans["answer"]
             ja_ans = "回答: "+self.translator(ans["answer"], target_lang="JA")
             ans["answer"] = ja_ans + "\n" + eng_ans
 
+        if stream:
+            text_mode = False
         if text_mode:
             return parse_answer(ans)
 
         return ans
 
 
-def parse_answer(ans):
+def parse_answer(ans, text_length=100):
     txt = ans["answer"]+"\n\n"
     for i, doc in enumerate(ans["context"]):
-        txt += f"Reference {i+1} \n"
-        t = doc["text"]
-        txt += f"{t} \n"
+        txt += f"- Reference {i+1} \n"
         p = doc["path"]
         txt += f"{p} \n"
         s = doc["sim"]
         txt += f"Similarity {s}\n"
-        txt += "---\n"
+        t = doc["text"][:text_length]
+        txt += f"{t} \n"
+        txt += "***\n"
 
     return txt
