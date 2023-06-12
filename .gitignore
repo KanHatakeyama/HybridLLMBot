@@ -165,3 +165,5 @@ develop
 settings/20B_tokenizer.json
 nohup.out
 .vscode
+MNIST
+lightning_logs
