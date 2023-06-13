@@ -4,12 +4,15 @@ import numpy as np
 
 
 class RWKVEmbedding:
-    def __init__(self,settings,mean_mode=True,normalize=True) -> None:
+    def __init__(self,model_path,
+                tokenizer_path="settings/20B_tokenizer.json",
+                 strategy='cpu fp32',
+                 mean_mode=True,normalize=True) -> None:
 
-        self.model = RWKV(model=settings["RWKV_MODEL"], 
-                    strategy=settings["RWKV_STRATEGY"],
+        self.model = RWKV(model=model_path, 
+                    strategy=strategy,
                     )
-        self.pipeline = PIPELINE(self.model,settings["RWKV_TOKENIZER"])
+        self.pipeline = PIPELINE(self.model,tokenizer_path)
 
         self.mean_mode=mean_mode
         self.normalize=normalize
@@ -21,6 +24,8 @@ class RWKVEmbedding:
         out, state = self.model.forward(inp_vec, None)
         np_state=[i.detach().cpu().numpy() for i in state]
 
+        np_state=[i for i in np_state if not np.isnan(i).any()]
+        np_state=[i for i in np_state if np.linalg.norm(i, axis=0, keepdims=True)<10**2]
         if self.mean_mode:
             np_state=np.mean(np_state,axis=0)
         else:

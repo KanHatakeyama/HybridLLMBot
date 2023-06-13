@@ -3,7 +3,7 @@
     "chunk_size_limit": 1000,
     "similarity_top_k": 4,
     "EMBED_SERVER_URL": "http://localhost:5000/api",
-    "EMBED_MODE": "SBERT",
+    "EMBED_MODE": "Vicuna",
     "JAPANESE_TOKENIZER_MODEL": "cl-tohoku/bert-base-japanese-whole-word-masking",
     "FILE_URL": "http://192.168.254.73:8099/"
 }

@@ -35,7 +35,7 @@ class VicunaEmbedding:
         np_state=calc_vec(txt,self.model,self.tokenizer)
 
         if self.normalize:
-            norm = np.linalg.norm(np_state, axis=0, keepdims=True)
+            norm = np.linalg.norm(np_state, axis=1, keepdims=True)
             np_state= np_state/ norm
 
         return np_state.reshape(1,-1).astype('float32')
