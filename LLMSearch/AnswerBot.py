@@ -11,6 +11,7 @@ import glob
 
 class AnswerBot:
     def __init__(self, query_module,
+                    searcher,
                  DEEPL_API_KEY=None,
                  setting_path='settings/settings.json'):
         with open(setting_path) as f:
@@ -19,7 +20,7 @@ class AnswerBot:
         self.settings = settings
         #self.embedder = ServerEmbedding()
         #self.searcher = TextSearcher(self.embedder, self.settings["data_path"])
-        self.searcher = SQLTextDB(setting_path=setting_path)
+        self.searcher = searcher
         self.setting_path = setting_path
         self.query_module = query_module
         self.DeepL_API_KEY = DEEPL_API_KEY
@@ -33,28 +34,9 @@ class AnswerBot:
     #    self.searcher.load_model()
 
     def index_documents(self, initiate=False):
-        # split_documents(initiate=initiate)
-        # calc vectors
-        # chunk_path_list = glob.glob(
-        #    self.settings["data_path"] + "/split/*.txt")
-        """
-        if not initiate:
-            self.load_model()
-        count = 0
-        print("calculating vectors...")
-        for path in tqdm(chunk_path_list):
-            self.searcher.calc_text_file(path)
-            count += 1
 
-            # 30回に1回保存
-            if count % 10 == 0:
-                self.searcher.save_model()
-
-        self.searcher.save_model()
-        """
         if initiate:
-            self.searcher = SQLTextDB(
-                setting_path=self.setting_path, initiate=True)
+            self.searcher.initialize()
 
         path_list = glob.glob(
             self.settings["data_path"]+"/original/**/*.txt", recursive=True)
@@ -62,12 +44,8 @@ class AnswerBot:
         for path in tqdm(path_list):
             self.searcher.add_text(path)
 
-    def search_related_documents(self, question, k=3, pad=False):
-        # if pad:
-        #    question = pad_text(question)
+    def search_related_documents(self, question, k=3):
         context_list = self.searcher.search(question, k=k)
-        # context_list = self.searcher.search(
-        #    (question, self.settings["chunk_size_limit"]), k)
         return context_list
 
     def ask(self, question,
@@ -82,9 +60,7 @@ class AnswerBot:
             if self.DeepL_API_KEY is None:
                 raise Exception("DeepL_API_KEY is not set.")
             question = self.translator(question)
-            #question = "日本語で回答して:"+question
-            #print("Japanese to English translation is done.")
-            # print(question)
+
 
         if context_list is None:
             context_list = self.search_related_documents(question, k, pad)

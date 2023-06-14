@@ -1,31 +1,53 @@
 import faiss
 import joblib
 import os
+from .DocSplitter import split_text
+import json
 
-
-class TextSearcher:
-    def __init__(self, embedder, base_path) -> None:
+class VectorSearcher:
+    def __init__(self, embedder, 
+                 setting_path='settings/settings.json',
+) -> None:
+        with open(setting_path) as f:
+            settings = json.load(f)
         self.embedder = embedder
-        self.base_path = base_path
+        self.base_path =settings["data_path"] 
+        self.chunk_size_limit = settings["chunk_size_limit"]
         self.path_list = []
-        dim = self.embedder("a").shape[1]
-        self.index = faiss.IndexFlatL2(dim)
-        self.index = faiss.IndexFlatIP(dim)
+        self.dim = self.embedder("a").shape[1]
+        #self.index = faiss.IndexFlatL2(dim)
+        self.index = faiss.IndexFlatIP(self.dim)
 
         meta_path = self.base_path+"/meta"
         if not os.path.exists(meta_path):
             os.mkdir(meta_path)
 
-    def calc_text_file(self, path):
+        try:
+            self.load_model()
+        except:
+            print("error loading model. initializing...")
+
+    def initialize(self):
+        self.path_list = []
+        self.index = faiss.IndexFlatIP(self.dim)
+
+    def add_text(self, path):
         if path in self.path_list:
             return
 
         with open(path, 'r') as f:
             text = f.read()
-        vec = self.embedder(text)
+        chunk_list = split_text(text, self.chunk_size_limit)
 
-        self.index.add(vec)
+        for i, chunk in enumerate(chunk_list):
+            self.add_record(chunk)
+
         self.path_list.append(path)
+        self.save_model()
+
+    def add_record(self, text):
+        vec = self.embedder(text)
+        self.index.add(vec)
         return vec
 
     def save_model(self):

@@ -14,7 +14,7 @@ nltk.download('punkt')
 class SQLTextDB:
     def __init__(self,
                  setting_path='settings/settings.json',
-                 initiate=False) -> None:
+                 ) -> None:
 
         with open(setting_path) as f:
             settings = json.load(f)
@@ -22,14 +22,22 @@ class SQLTextDB:
         self.db_path = settings["data_path"]+"/meta/text.db"
         self.chunk_size_limit = settings["chunk_size_limit"]
 
-        # self.tokenizer = BertJapaneseTokenizer.from_pretrained(
-        #    settings["JAPANESE_TOKENIZER_MODEL"])
         self.tokenizer = MeCab.Tagger("-Owakati")
-        self.db = Database(self.db_path, recreate=initiate)
-        if initiate:
-            self.add_record("path", "text", 0)
-            self.db["text"].enable_fts(["text"], tokenize="porter")
-            self.db["finished"].enable_fts(["path"], tokenize="porter")
+
+        try:
+            self.db = Database(self.db_path, recreate=False)
+        except:
+            print("error occured. initializing database...")
+            self.initialize()
+
+    def initialize(self):
+        self.db = Database(self.db_path, recreate=True)
+        self.add_record("path", "text", 0)
+        self.db["text"].enable_fts(["text"], tokenize="porter")
+        self.db["finished"].enable_fts(["path"], tokenize="porter")
+
+
+
 
     def add_record(self, path, text, split_id):
         self.db['text'].insert({
