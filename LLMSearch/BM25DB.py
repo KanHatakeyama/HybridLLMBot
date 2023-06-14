@@ -16,7 +16,7 @@ class BM25DB:
     def __init__(self,
                  setting_path='settings/settings.json',
                  parser=mecab,
-                 initiate=False) -> None:
+                 ) -> None:
 
         with open(setting_path) as f:
             settings = json.load(f)
@@ -28,10 +28,10 @@ class BM25DB:
         self.conn = sqlite3.connect(self.db_path)
         self.c = self.conn.cursor()
 
-        if initiate:
-            self.c.execute("DROP TABLE IF EXISTS docs;")
-            self.c.execute("CREATE VIRTUAL TABLE docs USING fts5(content, filepath, number);")
-            self.add_record("test_path", "test text", 0, commit=True)
+    def initiate(self):
+        self.c.execute("DROP TABLE IF EXISTS docs;")
+        self.c.execute("CREATE VIRTUAL TABLE docs USING fts5(content, filepath, number);")
+        self.add_record("test_path", "test text", 0, commit=True)
 
     def parse_text(self, text):
         return self.parser.parse(text).strip()
