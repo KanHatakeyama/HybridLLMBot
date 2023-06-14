@@ -2,8 +2,8 @@ import json
 #from .DocSplitter import split_documents
 #from .TextSearcher import TextSearcher
 #from .ServerEmbedding import ServerEmbedding
-#from .SQLTextDB import SQLTextDB
-from .BM25DB import BM25DB
+from .SQLTextDB import SQLTextDB
+#from .BM25DB import BM25DB
 from tqdm import tqdm
 import glob
 #from .CleanText import pad_text
@@ -19,7 +19,7 @@ class AnswerBot:
         self.settings = settings
         #self.embedder = ServerEmbedding()
         #self.searcher = TextSearcher(self.embedder, self.settings["data_path"])
-        self.searcher = BM25DB(setting_path=setting_path)
+        self.searcher = SQLTextDB(setting_path=setting_path)
         self.setting_path = setting_path
         self.query_module = query_module
         self.DeepL_API_KEY = DEEPL_API_KEY
@@ -53,7 +53,7 @@ class AnswerBot:
         self.searcher.save_model()
         """
         if initiate:
-            self.searcher = BM25DB(
+            self.searcher = SQLTextDB(
                 setting_path=self.setting_path, initiate=True)
 
         path_list = glob.glob(
