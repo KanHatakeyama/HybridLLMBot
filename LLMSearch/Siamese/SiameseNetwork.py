@@ -17,10 +17,36 @@ class BaseNetwork(nn.Module):
         #x = (self.layer3(x))
         return x
 
+class BaseEqualNetwork(nn.Module):
+    def __init__(self, input_dim=64):
+        super().__init__()
+        """
+        start from equal output
+        """
+        self.layer1 = nn.Linear(input_dim, input_dim)
+        self.layer1.weight = nn.Parameter(torch.eye(input_dim))
+        self.layer1.bias = nn.Parameter(torch.zeros(input_dim))
+
+        self.layer2 = nn.Linear(input_dim, input_dim)
+        self.layer2.weight = nn.Parameter(torch.eye(input_dim))
+        self.layer2.bias = nn.Parameter(torch.zeros(input_dim))
+
+        self.layer3 = nn.Linear(input_dim, input_dim)
+        self.layer3.weight = nn.Parameter(torch.eye(input_dim))
+        self.layer3.bias = nn.Parameter(torch.zeros(input_dim))
+
+    def forward(self, x):
+        x = F.tanh(self.layer1(x))
+        x = F.tanh(self.layer2(x))
+        x = (self.layer2(x))
+        #x = (self.layer3(x))
+        return x
+
 class SiameseNetwork(pl.LightningModule):
     def __init__(self, input_dim=64, hidden_dim=128):
         super().__init__()
-        self.base_network = BaseNetwork(input_dim, hidden_dim)
+        #self.base_network = BaseNetwork(input_dim, hidden_dim)
+        self.base_network = BaseEqualNetwork(input_dim)
         self.loss = nn.CosineEmbeddingLoss()
 
     def forward(self, input1, input2):

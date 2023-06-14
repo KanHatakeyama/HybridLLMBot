@@ -36,7 +36,7 @@ class SiameseComparer:
 
         model = SiameseNetwork(input_dim=input_dim,hidden_dim=hidden_dim)
 
-        early_stop_callback = EarlyStopping(monitor='val_loss')
+        early_stop_callback = EarlyStopping(monitor='val_loss',patience=5)
         trainer = pl.Trainer(max_epochs=100, callbacks=[early_stop_callback])
         trainer.fit(model, train_loader, val_loader)
 
