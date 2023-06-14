@@ -21,7 +21,7 @@ class BM25DB:
         with open(setting_path) as f:
             settings = json.load(f)
 
-        self.db_path = settings["data_path"]+"/meta/text.db"
+        self.db_path = settings["data_path"]+"/meta/text_bm25.db"
         self.chunk_size_limit = settings["chunk_size_limit"]
 
         self.parser= parser

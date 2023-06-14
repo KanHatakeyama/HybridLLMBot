@@ -39,15 +39,15 @@ class VectorSearcher:
             text = f.read()
         chunk_list = split_text(text, self.chunk_size_limit)
 
-        for i, chunk in enumerate(chunk_list):
-            self.add_record(chunk)
+        for _, chunk in enumerate(chunk_list):
+            self.add_record(chunk,path)
 
-        self.path_list.append(path)
         self.save_model()
 
-    def add_record(self, text):
+    def add_record(self, text,path=""):
         vec = self.embedder(text)
         self.index.add(vec)
+        self.path_list.append(path)
         return vec
 
     def save_model(self):

@@ -27,7 +27,7 @@ class GPTQuery:
         else:
             return response
 
-    def reference_ask(self, query, context_list, k=2, ref_max_length=3500, stream=False):
+    def reference_ask(self, query, context_list, k=2, ref_max_length=3300, stream=False):
         context_text = ""
         for i in range(k):
             context_text += context_list[i]["text"]+"."
