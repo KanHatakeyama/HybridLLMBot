@@ -7,12 +7,16 @@ import json
 class VectorSearcher:
     def __init__(self, embedder, 
                  setting_path='settings/settings.json',
+                 chunk_size_limit=None,
 ) -> None:
         with open(setting_path) as f:
             settings = json.load(f)
         self.embedder = embedder
         self.base_path =settings["data_path"] 
-        self.chunk_size_limit = settings["chunk_size_limit"]
+        if chunk_size_limit is None:
+            self.chunk_size_limit = settings["chunk_size_limit"]
+        else:
+            self.chunk_size_limit = chunk_size_limit
         self.path_list = []
         self.dim = self.embedder("a").shape[1]
         #self.index = faiss.IndexFlatL2(dim)

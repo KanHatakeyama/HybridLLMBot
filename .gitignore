@@ -167,3 +167,4 @@ nohup.out
 .vscode
 MNIST
 lightning_logs
+rinna_ppo
