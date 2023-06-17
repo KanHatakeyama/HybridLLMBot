@@ -6,7 +6,18 @@ import re
 from .CleanText import clean_text
 import hashlib
 from tqdm import tqdm
+import re
+from nltk.corpus import stopwords
+import nltk
+nltk.download('stopwords')
 
+def remove_stopwords(text):
+    text = re.sub(r'http\S+|www.\S+', '', text)
+    stop_words = set(stopwords.words('english'))
+    words = text.split()
+    words = [word for word in words if word not in stop_words]
+    new_text = ' '.join(words)
+    return new_text
 
 def filename_fn(filename): return {"file_name": filename}
 
