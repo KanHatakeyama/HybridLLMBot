@@ -44,6 +44,10 @@ class AnswerBot:
         for path in tqdm(path_list):
             self.searcher.add_text(path)
 
+        if hasattr(self.searcher, "save"):
+            self.searcher.save()
+
+
     def search_related_documents(self, question, k=3):
         context_list = self.searcher.search(question, k=k)
         return context_list
