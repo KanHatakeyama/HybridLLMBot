@@ -3,13 +3,8 @@ from LLMSearch.GPTQuery import GPTQuery
 from settings.key import GPT_API_KEY, DEEPL_API_KEY
 import openai
 import streamlit
-from LLMSearch.Embedding.SBERTFineTuneEmbedding import SBERTFineTuneEmbedding
-from LLMSearch.VectorSearcher import VectorSearcher
-from LLMSearch.BM25DB import BM25DB
-from LLMSearch.SQLTextDB import SQLTextDB
+from LLMSearch.BM25VecDB import BM25VecDB
 import json
-embedder=SBERTFineTuneEmbedding()
-searcher=VectorSearcher(embedder)
 
 
 openai.api_key = GPT_API_KEY
@@ -18,21 +13,12 @@ openai.api_key = GPT_API_KEY
 #                searcher=searcher,
 #                DEEPL_API_KEY=DEEPL_API_KEY)
 bot1 = AnswerBot(query_module=GPTQuery(GPT_API_KEY),
-                searcher=searcher,
+                searcher=BM25VecDB(),
                 DEEPL_API_KEY=DEEPL_API_KEY,
                 )
-
-bot2=AnswerBot(query_module=GPTQuery(GPT_API_KEY),
-                searcher=SQLTextDB(), 
-                DEEPL_API_KEY=DEEPL_API_KEY,
-                )
-
-bot3=AnswerBot(query_module=GPTQuery(GPT_API_KEY),
-                searcher=BM25DB(),
-                DEEPL_API_KEY=DEEPL_API_KEY,   
-                )
-
 input_text = streamlit.text_input('質問を入力')
+
+split_N = 3
 
 if len(input_text) > 0:
     result_area = streamlit.empty()
@@ -42,8 +28,8 @@ if len(input_text) > 0:
 
     # get references
     related_documents=[]
-    for bot in [bot1,bot2,bot3]:
-        related_documents+=bot.search_related_documents(input_text, k=10)
+    for bot in [bot1]:
+        related_documents+=bot.search_related_documents(input_text, k=9)
 
     #integrate references
     related_documents=[{"path":d["path"],"text":d["text"],"sim":0} for d in related_documents]
@@ -61,11 +47,11 @@ if len(input_text) > 0:
 
     # GPT ans
 
-    related_documents_list = [related_documents[i:i+5]
-                              for i in range(0, len(related_documents), 5)]
+    related_documents_list = [related_documents[i:i+split_N]
+                              for i in range(0, len(related_documents), split_N)]
     for i, related_documents in enumerate(related_documents_list):
-        start = i*5+1
-        end = (i+1)*5
+        start = i*split_N+1
+        end = (i+1)*split_N
 
         text += f"\n### Reference{start}から{end}をもとにした回答\n"
         gpt_ans = bot.ask(
@@ -75,3 +61,15 @@ if len(input_text) > 0:
             next = chunk['choices'][0]['delta'].get('content', '')
             text += next
             result_area.write(text)
+
+
+    #総括
+    all_context=[{"text":text[text.find("## GPTの回答は"):]}]
+    text+="\n### 総括 \n"
+    gpt_ans = bot.ask(
+        input_text, context_list=all_context, stream=True)
+    completion = gpt_ans["answer"]
+    for chunk in completion:
+        next = chunk['choices'][0]['delta'].get('content', '')
+        text+= next
+        result_area.write(text)

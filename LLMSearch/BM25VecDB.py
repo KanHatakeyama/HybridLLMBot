@@ -96,7 +96,7 @@ class BM25VecDB:
         ret_list=[]
         for i in range(k):
             temp_dict = {}
-            temp_dict["fin_path"] = path_list[i]
+            temp_dict["path"] = path_list[i]
             temp_dict["text"] = text_list[i].replace(" ", "")
             temp_dict["sim"] = sim_list[i]
             ret_list.append(temp_dict)
