@@ -60,7 +60,7 @@ class BM25VecDB:
 
     def add_text(self, path):
         if path in self.db["fin_path"]:
-            print(f"{path} already added")
+            #print(f"{path} already added")
             return
 
         with open(path, 'r') as f:
@@ -71,6 +71,7 @@ class BM25VecDB:
         chunk_list = split_text(text, self.chunk_size_limit)
         for i, chunk in enumerate(chunk_list):
             self.add_record(path, chunk, i)
+            print(f"{i} {path}")
 
     def save(self):
         joblib.dump(self.db, self.db_path)

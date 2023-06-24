@@ -12,7 +12,9 @@ openai.api_key = GPT_API_KEY
 #bot = AnswerBot(query_module=GPTQuery(GPT_API_KEY),
 #                searcher=searcher,
 #                DEEPL_API_KEY=DEEPL_API_KEY)
-bot1 = AnswerBot(query_module=GPTQuery(GPT_API_KEY),
+bot1 = AnswerBot(query_module=GPTQuery(GPT_API_KEY,
+                                       # model="gpt-4-0613"
+                                        ),
                 searcher=BM25VecDB(),
                 DEEPL_API_KEY=DEEPL_API_KEY,
                 )
@@ -39,7 +41,7 @@ if len(input_text) > 0:
     ans = {}
     ans["answer"] = ""
     ans["context"] = related_documents
-    str_ans = parse_answer(ans, base_url=bot.file_url,text_length=200)
+    str_ans = parse_answer(ans, base_url=bot.file_url,text_length=1000)
     text += str_ans
 
     text += "## GPTの回答は以下の通りです\n"
