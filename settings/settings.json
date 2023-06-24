@@ -1,6 +1,6 @@
 {
     "data_path": "UserData",
-    "chunk_size_limit": 1000,
+    "chunk_size_limit": 512,
     "similarity_top_k": 4,
     "EMBED_SERVER_URL": "http://localhost:5000/api",
     "EMBED_MODE": "Vicuna",
