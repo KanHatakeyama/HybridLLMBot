@@ -1,8 +1,6 @@
 from . DocSplitter import clean_text, split_text
 import json
 import MeCab
-import re
-import unicodedata
 from .Embedding.BM25Transformer import BM25Transformer
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer
@@ -25,6 +23,7 @@ class BM25VecDB:
             settings = json.load(f)
 
         self.db_path = settings["data_path"]+"/meta/text_bm25vec.db"
+        self.model_path=self.db_path.replace(".db", ".vec")
         self.chunk_size_limit = settings["chunk_size_limit"]
         self.parser= parser
         self.vectorizer= Pipeline(steps=[
@@ -37,6 +36,10 @@ class BM25VecDB:
             self.db=joblib.load(self.db_path)
         except:
             self.initialize()
+        try:
+            self.vec,self.vectorizer=joblib.load(self.model_path)
+        except:
+            pass
 
     def initialize(self):
         self.db = {
@@ -71,7 +74,7 @@ class BM25VecDB:
         chunk_list = split_text(text, self.chunk_size_limit)
         for i, chunk in enumerate(chunk_list):
             self.add_record(path, chunk, i)
-            print(f"{i} {path}")
+            #print(f"{i} {path}")
 
     def save(self):
         joblib.dump(self.db, self.db_path)
@@ -79,6 +82,7 @@ class BM25VecDB:
 
     def fit_model(self):
         self.vec=self.vectorizer.fit_transform(self.db["text"])
+        joblib.dump([self.vec,self.vectorizer], self.model_path)
 
     def search(self, query, k=10):
         if self.vec is None:
